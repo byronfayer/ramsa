@@ -23,6 +23,7 @@ function Header() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [])
+  useEffect(() => { document.body.style.overflow = open ? 'hidden' : '' }, [open])
   const mobile = () => window.matchMedia('(max-width:960px)').matches
   return (
     <header className="top">
@@ -91,7 +92,8 @@ function Categories() {
               <div className="in"><h3>{c.name}</h3><p>{c.text}</p><span className="go">{c.cta} →</span></div>
             </a>
           ))}
-          <a className="cat c6 rv" href="#mayorista">
+          <a className="cat c6 ph rv" href="#mayorista">
+            <img loading="lazy" src={IMG.mayor} alt="Productos RAMSA para venta por mayor" />
             <div className="in">
               <div><h3>Ventas Por Mayor</h3><p>Para comercios, terapeutas y emprendedoras que quieren sumar RAMSA.</p></div>
               <span className="go">Consultar condiciones →</span>
@@ -115,11 +117,11 @@ function Products() {
           {PRODUCTS.map((p) => (
             <article key={p.id} className="prod rv">
               <a className="img ph" href={`${SITE}/product/${p.slug}/`} aria-label={p.name}><img loading="lazy" src={p.img} alt={p.name} /></a>
-              <h3>{p.name}</h3>
+              <h3><a href={`${SITE}/product/${p.slug}/`}>{p.name}</a></h3>
               <div className="price">{p.price}</div>
               <div className="row">
                 <a className="btn btn-primary" href={`${SITE}/tienda/?add-to-cart=${p.id}`}>Agregar al carrito</a>
-                <a className="btn btn-line" href={`${SITE}/product/${p.slug}/`}>Ver ficha</a>
+                <a className="btn btn-line fichabtn" href={`${SITE}/product/${p.slug}/`}>Ver ficha</a>
               </div>
             </article>
           ))}
@@ -134,8 +136,8 @@ function About() {
     <section className="edit" id="universo">
       <div className="wrap">
         <div className="collage rv">
-          <div className="a ph"><img loading="lazy" src={IMG.about} alt="Ambiente cálido con elementos naturales" /></div>
-          <div className="b ph"><img loading="lazy" src={IMG.detail} alt="Detalle de producto artesanal" /></div>
+          <div className="a ph"><img loading="lazy" src={IMG.nosotras} alt="Ambiente cálido con elementos naturales" /></div>
+          <div className="b ph"><img loading="lazy" src={IMG.receta2} alt="Detalle de producto artesanal" /></div>
         </div>
         <div className="rv">
           <span className="eyebrow">El universo RAMSA</span>
@@ -153,7 +155,7 @@ function Recipe() {
   return (
     <section className="receta" id="receta">
       <div className="wrap">
-        <div className="photo ph rv"><img loading="lazy" src={IMG.hero} alt="Elaboración artesanal" /></div>
+        <div className="photo ph rv"><img loading="lazy" src={IMG.receta} alt="Elaboración artesanal" /></div>
         <div className="rv">
           <span className="eyebrow">Receta artesanal</span>
           <h2>Lo hecho a mano tiene su propio tiempo</h2>

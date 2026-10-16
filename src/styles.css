@@ -173,3 +173,70 @@ footer .tag{margin-top:16px;max-width:34ch}
 .rv{opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s ease}
 .rv.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.rv{opacity:1;transform:none}html{scroll-behavior:auto}}
+
+/* ===== Mejoras móvil / táctil ===== */
+:root{--hh:76px}
+.hero{min-height:min(86vh,780px);min-height:min(86svh,780px)}
+.c6 img{opacity:1}
+.c6::before{background:linear-gradient(90deg,rgba(101,58,67,.92),rgba(101,58,67,.5))}
+.prod h3 a:hover{color:var(--terra)}
+@media(hover:none){.btn:hover{transform:none}.cat:hover img,.prod:hover .img img{transform:none}}
+@media(max-width:960px){
+  :root{--hh:68px}
+  .top .wrap{height:var(--hh)}
+  .nav{inset:var(--hh) 0 auto 0;max-height:calc(100svh - var(--hh));padding-bottom:max(28px,env(safe-area-inset-bottom))}
+}
+@media(max-width:600px){
+  :root{--gut:20px;--hh:64px}
+  section{padding:56px 0}
+  .brand img{width:38px;height:38px}
+  .brand span{font-size:1.3rem}
+  /* Hero */
+  .hero{min-height:82svh}
+  .hero::before{background:linear-gradient(180deg,rgba(28,40,32,.35) 0%,rgba(28,40,32,.55) 45%,rgba(28,40,32,.88) 100%)}
+  .hero .wrap{padding-top:96px;padding-bottom:44px}
+  .hero h1{font-size:clamp(2.6rem,12.5vw,3.4rem);max-width:11ch;margin:14px 0 16px}
+  .hero p{font-size:1rem;margin-bottom:26px}
+  .hero .cta{flex-direction:column;gap:12px}
+  .hero .cta .btn{justify-content:center;width:100%}
+  /* Encabezados */
+  .head{flex-direction:column;align-items:flex-start;gap:14px;margin-bottom:28px}
+  .head h2{font-size:2.1rem}
+  .head .btn{width:100%;justify-content:center}
+  /* Categorías */
+  .cats{gap:14px;grid-auto-rows:auto}
+  .cat{min-height:0;aspect-ratio:4/3.3;border-radius:20px}
+  .c1{aspect-ratio:4/4.6;min-height:0}
+  .c6{aspect-ratio:auto;min-height:250px}
+  .c6 .in{flex-direction:column;align-items:flex-start;gap:16px}
+  .cat .in{padding:20px}
+  .cat h3{font-size:1.75rem}
+  .cat p{font-size:.9rem;margin-bottom:12px}
+  /* Productos: 2 columnas compactas */
+  .grid4{grid-template-columns:repeat(2,1fr);gap:22px 14px}
+  .prod .img{border-radius:14px}
+  .prod h3{font-size:1.2rem;margin-top:12px;line-height:1.15}
+  .prod .price{margin-bottom:10px;font-size:.95rem}
+  .prod .row{flex-direction:column;gap:0}
+  .prod .btn{width:100%;justify-content:center;padding:.7em .6em;font-size:.76rem;letter-spacing:.02em}
+  .fichabtn{display:none}
+  /* Editorial */
+  .collage{padding-bottom:14%}
+  .collage .a{width:82%}
+  .collage .b{border-width:6px}
+  .edit h2{font-size:2.3rem}
+  .edit .btn,.receta .btn,.mayor .btn{width:100%;justify-content:center}
+  .pills{margin-bottom:26px}
+  /* Receta y mayorista */
+  .receta h2{font-size:2.1rem}
+  .receta .photo{aspect-ratio:4/3.4}
+  .mayor .box{padding:32px 24px;border-radius:22px}
+  .mayor h2{font-size:2.1rem}
+  .mayor .side{width:100%}
+  .mayor .box::after{width:200px;height:200px;right:-70px;top:-70px}
+  /* Footer */
+  footer{padding:52px 0 24px}
+  .fgrid{grid-template-columns:1fr 1fr;gap:32px 20px}
+  .fgrid>div:first-child{grid-column:1/-1}
+  .fbot{flex-direction:column;gap:6px}
+}
