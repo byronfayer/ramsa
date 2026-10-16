@@ -29,10 +29,10 @@ export const CATEGORIES = [
   { id: 'c5', name: 'Mazos y Oráculos', text: 'Cartas para guiar tus preguntas y tus rituales.', cta: 'Ver mazos', href: `${SITE}/product/oraculo-mistico/`, img: IMG.mazos, alt: 'Mazos de cartas y oráculos' }, // sin categoría propia en la tienda: enlaza al producto existente
 ]
 
-// Datos reales de la API pública de la tienda (15/10/2026). Los productos no tienen foto cargada: se usa la de su categoría.
+// Precios y productos confirmados por la clienta/tienda (15/10/2026). Sin foto propia en la tienda: se usa la de su categoría.
 export const PRODUCTS = [
   { name: 'Lectura de Tarot', price: '$ 60,00', slug: 'lectura-de-tarot', id: 30, img: IMG.lecturas },
-  { name: 'Oráculo místico', price: '$ 10,00', slug: 'oraculo-mistico', id: 17, img: IMG.mazos },
-  { name: 'Amatista pulida', price: '$ 8,00', slug: 'amatista-pulida', id: 11, img: IMG.piedras },
-  { name: 'Sahumerio salvia', price: '$ 5,00', slug: 'sahumerio-salvia', id: 13, img: IMG.sahumerios },
+  { name: 'Cosmética Natural', price: '$ 40,00', slug: 'cosmetica-natural', id: 28, img: IMG.cosmetica },
+  { name: 'Cristales Únicos', price: '$ 25,00', slug: 'cristales-unicos', id: 26, img: IMG.piedras },
+  { name: 'Sahumerios Naturales', price: '$ 30,00', slug: 'sahumerios-naturales', id: 24, img: IMG.sahumerios },
 ]
