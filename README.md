@@ -12,3 +12,13 @@ Deploy: Vercel (framework Vite, sin configuración extra) o Cloudflare Pages (bu
 - Las URLs de tienda/carrito apuntan a tiendaramsa.com.ar; ajustar SITE si cambia el dominio.
 - Las fotos son las mismas del sitio actual (hotlink a tiendaramsa.com.ar y Unsplash). Descargarlas a /public/img y cambiar las rutas en src/data.js antes de dar de baja el WordPress viejo.
 - Años: el hero original dice "desde 1985" y "Nosotras" dice "aproximadamente 1980". Se usa el texto de "Nosotras"; confirmar el dato con la clienta.
+
+## Supabase y panel /admin
+1. Supabase → SQL Editor → ejecutar `supabase/schema.sql` (tablas, seguridad RLS, bucket de fotos y categorías iniciales).
+2. Authentication → Users → *Add user* (email + contraseña, "Auto Confirm"). Desactivar "Allow new users to sign up".
+3. Habilitarla como administradora (SQL Editor):
+   `insert into public.admins (user_id) select id from auth.users where email = 'EMAIL_DE_LA_CLIENTA';`
+4. Entrar a `/admin`. Los productos visibles/destacados aparecen en el inicio. Si la base está vacía, la tienda muestra los 4 productos de respaldo.
+5. Authentication → URL Configuration → agregar el dominio de producción como Site URL.
+
+La clave publishable es pública por diseño; lo que protege los datos son las políticas RLS. Nunca poner la `service_role` ni la secret key en el proyecto.

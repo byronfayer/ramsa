@@ -105,7 +105,47 @@ function Categories() {
   )
 }
 
+const money = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(Number(n) || 0)
+
+// Productos de respaldo (los actuales de la tienda) si Supabase está vacío o no responde.
+const FALLBACK = PRODUCTS.map((p) => ({
+  key: p.id, name: p.name, price: p.price, img: p.img, href: `${SITE}/product/${p.slug}/`,
+  actions: [
+    { label: 'Agregar al carrito', href: `${SITE}/tienda/?add-to-cart=${p.id}` },
+    { label: 'Ver ficha', href: `${SITE}/product/${p.slug}/`, ghost: true },
+  ],
+}))
+
+function useProducts() {
+  const [items, setItems] = useState(FALLBACK)
+  useEffect(() => {
+    let on = true
+    import('./lib/supabase.js').then(({ supabase }) =>
+      supabase.from('products')
+        .select('id,name,price,image_url,stock,external_url,featured,description')
+        .eq('active', true)
+        .order('featured', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(8)
+    ).then(({ data, error }) => {
+      if (!on || error || !data || !data.length) return
+      const wa = CONTACT.whatsapp.replace(/\D/g, '')
+      setItems(data.map((p) => {
+        const out = p.stock === 0
+        const actions = out ? [] : p.external_url
+          ? [{ label: 'Ver producto', href: p.external_url }]
+          : wa ? [{ label: 'Consultar', href: `https://wa.me/${wa}?text=${encodeURIComponent('Hola RAMSA, quiero consultar por: ' + p.name)}` }]
+          : CONTACT.email ? [{ label: 'Consultar', href: `mailto:${CONTACT.email}?subject=${encodeURIComponent('Consulta: ' + p.name)}` }] : []
+        return { key: p.id, name: p.name, price: money(p.price), img: p.image_url, href: p.external_url || null, out, actions }
+      }))
+    }).catch(() => {})
+    return () => { on = false }
+  }, [])
+  return items
+}
+
 function Products() {
+  const items = useProducts()
   return (
     <section className="products" id="destacados">
       <div className="wrap">
@@ -114,17 +154,25 @@ function Products() {
           <a className="btn btn-line" href={`${SITE}/tienda/`}>Ver toda la tienda</a>
         </div>
         <div className="grid4">
-          {PRODUCTS.map((p) => (
-            <article key={p.id} className="prod rv">
-              <a className="img ph" href={`${SITE}/product/${p.slug}/`} aria-label={p.name}><img loading="lazy" src={p.img} alt={p.name} /></a>
-              <h3><a href={`${SITE}/product/${p.slug}/`}>{p.name}</a></h3>
-              <div className="price">{p.price}</div>
-              <div className="row">
-                <a className="btn btn-primary" href={`${SITE}/tienda/?add-to-cart=${p.id}`}>Agregar al carrito</a>
-                <a className="btn btn-line fichabtn" href={`${SITE}/product/${p.slug}/`}>Ver ficha</a>
-              </div>
-            </article>
-          ))}
+          {items.map((p) => {
+            const media = p.img ? <img loading="lazy" src={p.img} alt={p.name} /> : null
+            return (
+              <article key={p.key} className="prod in">
+                {p.href
+                  ? <a className="img ph" href={p.href} aria-label={p.name}>{media}{p.out && <span className="badge-stock">Sin stock</span>}</a>
+                  : <div className="img ph">{media}{p.out && <span className="badge-stock">Sin stock</span>}</div>}
+                <h3>{p.href ? <a href={p.href}>{p.name}</a> : p.name}</h3>
+                <div className="price">{p.price}</div>
+                {p.actions.length > 0 && (
+                  <div className="row">
+                    {p.actions.map((a) => (
+                      <a key={a.label} className={'btn ' + (a.ghost ? 'btn-line fichabtn' : 'btn-primary')} href={a.href}>{a.label}</a>
+                    ))}
+                  </div>
+                )}
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>

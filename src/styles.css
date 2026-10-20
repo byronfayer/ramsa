@@ -240,3 +240,6 @@ footer .tag{margin-top:16px;max-width:34ch}
   .fgrid>div:first-child{grid-column:1/-1}
   .fbot{flex-direction:column;gap:6px}
 }
+
+.badge-stock{position:absolute;left:12px;top:12px;background:rgba(247,243,236,.94);color:var(--wine);font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px}
+.prod .img.ph{display:block}
