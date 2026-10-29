@@ -9,7 +9,7 @@
     "dev:client": "vite",
     "build": "vite build",
     "seed": "node server/seed.js",
-    "start": "node server/index.js",
+    "start": "node server/seed.js && node server/index.js",
     "postinstall": "node server/seed.js || true"
   },
   "dependencies": {
