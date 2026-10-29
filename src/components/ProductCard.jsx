@@ -7,7 +7,7 @@ export default function ProductCard({ p }) {
   const to = `/producto/${p.slug}`
   return (
     <article className="pcard rv">
-      <Link className="pcard-img ph" to={to} aria-label={p.name}>
+      <Link className={`pcard-img${p.image_url ? '' : ' ph'}`} to={to} aria-label={p.name}>
         {p.image_url && <img loading="lazy" src={p.image_url} alt={p.name} />}
         {out && <span className="badge-stock">Sin stock</span>}
         {p.featured && !out && <span className="badge-feat">Destacado</span>}
