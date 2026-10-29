@@ -7,11 +7,11 @@ import ProductCard from '../components/ProductCard.jsx'
 
 const HERO_IMG = 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1600&q=80'
 const CAT_IMAGES = {
-  'lecturas-manos-tarot': 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&q=80',
-  'piedras-energeticas': 'https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?auto=format&fit=crop&w=800&q=80',
-  'sahumerios-naturales': 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
-  'cosmetica-natural': 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80',
-  'mazos-y-oraculos': 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
+  'lecturas-manos-tarot': 'https://tiendaramsa.com.ar/wp-content/uploads/2026/05/ed33a534-e7a8-4585-a309-f6ab95fe4b6e.webp',
+  'piedras-energeticas': 'https://tiendaramsa.com.ar/wp-content/uploads/2026/05/277bee9d-705a-4728-8f5b-7e73f9eee7a1.webp',
+  'sahumerios-naturales': 'https://tiendaramsa.com.ar/wp-content/uploads/2026/08/IMG_20260620_174701-scaled.jpg',
+  'cosmetica-natural': 'https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=800&q=80',
+  'mazos-y-oraculos': 'https://images.unsplash.com/photo-1704030328221-94fa7e021808?auto=format&fit=crop&w=800&q=80',
 }
 
 export default function Home() {

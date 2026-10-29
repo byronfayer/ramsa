@@ -114,11 +114,11 @@ if (!anyProd) {
     return r?.id || null
   }
   const prods = [
-    ['Lectura de Tarot', 'lecturas-manos-tarot', 6000, 'Sesión de lectura de tarot personalizada para acompañarte en tus decisiones.', null, true, 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&q=80'],
-    ['Sahumerios Naturales', 'sahumerios-naturales', 3000, 'Sahumerios artesanales de hierbas seleccionadas para armonizar tus espacios.', null, true, 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80'],
-    ['Cristales y Piedras', 'piedras-energeticas', 2500, 'Piedras energéticas naturales. Elegí la que vibre con vos.', 12, true, 'https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?auto=format&fit=crop&w=800&q=80'],
-    ['Cosmética Natural', 'cosmetica-natural', 4000, 'Cuidado cotidiano con ingredientes naturales y espíritu artesanal.', null, true, 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80'],
-    ['Oráculo Místico', 'mazos-y-oraculos', 10000, 'Mazo de oráculo para guiar tus preguntas y tus rituales.', null, true, 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80'],
+    ['Lectura de Tarot', 'lecturas-manos-tarot', 6000, 'Sesión de lectura de tarot personalizada para acompañarte en tus decisiones.', null, true, 'https://images.unsplash.com/photo-1704030328221-94fa7e021808?auto=format&fit=crop&w=800&q=80'],
+    ['Sahumerios Naturales', 'sahumerios-naturales', 3000, 'Sahumerios artesanales de hierbas seleccionadas para armonizar tus espacios.', null, true, 'https://images.unsplash.com/photo-1509726360306-3f44543aea4c?auto=format&fit=crop&w=800&q=80'],
+    ['Cristales y Piedras', 'piedras-energeticas', 2500, 'Piedras energéticas naturales. Elegí la que vibre con vos.', 12, true, 'https://images.unsplash.com/photo-1597681542304-588805052e88?auto=format&fit=crop&w=800&q=80'],
+    ['Cosmética Natural', 'cosmetica-natural', 4000, 'Cuidado cotidiano con ingredientes naturales y espíritu artesanal.', null, true, 'https://images.unsplash.com/photo-1599847935464-fde3827639c2?auto=format&fit=crop&w=800&q=80'],
+    ['Oráculo Místico', 'mazos-y-oraculos', 10000, 'Mazo de oráculo para guiar tus preguntas y tus rituales.', null, true, 'https://images.unsplash.com/photo-1704030328221-94fa7e021808?auto=format&fit=crop&w=800&q=80'],
   ]
   for (const [name, catSlug, price, desc, stock, featured, img] of prods) {
     const cid = await catId(catSlug)

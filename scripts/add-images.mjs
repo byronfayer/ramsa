@@ -5,11 +5,11 @@
 import { sql } from '@vercel/postgres'
 
 const IMG_BY_CAT = {
-  'lecturas-manos-tarot': 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&q=80',
-  'piedras-energeticas': 'https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?auto=format&fit=crop&w=800&q=80',
-  'sahumerios-naturales': 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
-  'cosmetica-natural': 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80',
-  'mazos-y-oraculos': 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
+  'lecturas-manos-tarot': 'https://images.unsplash.com/photo-1704030328221-94fa7e021808?auto=format&fit=crop&w=800&q=80',
+  'piedras-energeticas': 'https://images.unsplash.com/photo-1597681542304-588805052e88?auto=format&fit=crop&w=800&q=80',
+  'sahumerios-naturales': 'https://images.unsplash.com/photo-1509726360306-3f44543aea4c?auto=format&fit=crop&w=800&q=80',
+  'cosmetica-natural': 'https://images.unsplash.com/photo-1599847935464-fde3827639c2?auto=format&fit=crop&w=800&q=80',
+  'mazos-y-oraculos': 'https://images.unsplash.com/photo-1704030328221-94fa7e021808?auto=format&fit=crop&w=800&q=80',
 }
 
 const { rows: products } = await sql`
