@@ -1,31 +1,23 @@
 {
   "name": "ramsa-web",
   "private": true,
-  "version": "2.0.0",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n server,vite -c green,cyan \"npm:dev:server\" \"npm:dev:client\"",
-    "dev:server": "node --watch server/index.js",
-    "dev:client": "vite",
+    "dev": "vite",
     "build": "vite build",
-    "seed": "node server/seed.js",
-    "start": "node server/seed.js && node server/index.js",
-    "postinstall": "node server/seed.js || true"
+    "setup": "node scripts/setup.mjs"
   },
   "dependencies": {
+    "@vercel/postgres": "^0.10.0",
     "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0",
-    "sql.js": "^1.15.2"
+    "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
-    "concurrently": "^9.1.0",
     "vite": "^5.4.11"
   }
 }
