@@ -1,30 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { supabase, BUCKET } from '../lib/supabase.js'
+import { api, getToken, setToken } from '../lib/api.js'
 import './admin.css'
 
 /* ---------- utilidades ---------- */
-const money = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(Number(n) || 0)
-const slugify = (s) =>
-  s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+const money = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(Number(n) || 0)
 const rand = () => Math.random().toString(36).slice(2, 6)
 
-async function toWebp(file, max = 1400) {
+// Redimensiona y comprime la imagen en el navegador antes de subirla.
+async function downscale(file, max = 1400) {
   try {
     const bmp = await createImageBitmap(file)
     const k = Math.min(1, max / Math.max(bmp.width, bmp.height))
     const c = document.createElement('canvas')
-    c.width = Math.round(bmp.width * k)
-    c.height = Math.round(bmp.height * k)
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k)
     c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height)
     const blob = await new Promise((r) => c.toBlob(r, 'image/webp', 0.85))
-    if (blob) return { blob, ext: 'webp', type: 'image/webp' }
-  } catch (_) { /* usa el original */ }
-  return { blob: file, ext: (file.name.split('.').pop() || 'jpg').toLowerCase(), type: file.type }
+    if (blob) return new File([blob], (file.name.replace(/\.\w+$/, '') || 'img') + '.webp', { type: 'image/webp' })
+  } catch { /* usa el original */ }
+  return file
 }
 
 const ICONS = {
   box: 'M21 8l-9-5-9 5v8l9 5 9-5V8zM3 8l9 5 9-5M12 13v8',
   tag: 'M3 12V4h8l10 10-8 8L3 12zM7.5 7.5h.01',
+  gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 2h-5l-.3 2.9a7 7 0 0 0-1.7 1l-2.4-1-2 3.4L3 11a7 7 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 1.7 1l.3 2.9h5l.3-2.9a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6a7 7 0 0 0 .1-1z',
   plus: 'M12 5v14M5 12h14',
   edit: 'M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4',
   trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
@@ -34,66 +33,41 @@ const ICONS = {
   img: 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M9 9.5h.01',
   star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z',
   x: 'M6 6l12 12M18 6L6 18',
-  check: 'M5 12l5 5 9-10',
 }
 const Icon = ({ n, size = 18 }) => (
   <svg className="adm-ic" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={ICONS[n]} /></svg>
 )
 
-/* ---------- raíz: sesión + permisos ---------- */
+/* ---------- raíz: sesión ---------- */
 export default function Admin() {
-  const [session, setSession] = useState(undefined)
-  const [perm, setPerm] = useState({ state: 'idle', error: '' })
+  const [session, setSession] = useState(undefined) // undefined=verificando, null=fuera, {user}=dentro
 
   useEffect(() => {
     document.title = 'Panel RAMSA'
     let m = document.querySelector('meta[name=robots]')
     if (!m) { m = document.createElement('meta'); m.name = 'robots'; document.head.appendChild(m) }
     m.content = 'noindex,nofollow'
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
-    return () => sub.subscription.unsubscribe()
+    if (!getToken()) { setSession(null); return }
+    api.me().then((d) => setSession(d)).catch(() => { setToken(null); setSession(null) })
   }, [])
 
-  useEffect(() => {
-    if (!session) { setPerm({ state: 'idle', error: '' }); return }
-    setPerm({ state: 'checking', error: '' })
-    supabase.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle().then(({ data, error }) => {
-      if (error) setPerm({ state: 'error', error: error.message })
-      else setPerm({ state: data ? 'ok' : 'denied', error: '' })
-    })
-  }, [session])
-
-  if (session === undefined || perm.state === 'checking') return <div className="adm-center"><div className="adm-spinner" /></div>
-  if (!session) return <Login />
-  if (perm.state === 'ok') return <Shell session={session} />
-  return (
-    <div className="adm-center">
-      <div className="adm-card adm-narrow">
-        <h1 className="adm-h1">{perm.state === 'error' ? 'No se pudo verificar el acceso' : 'Sin permisos de administración'}</h1>
-        <p className="adm-muted">
-          {perm.state === 'error'
-            ? `Error: ${perm.error}. Revisá que se haya ejecutado supabase/schema.sql en el proyecto.`
-            : `La cuenta ${session.user.email} no está habilitada como administradora.`}
-        </p>
-        <button className="adm-btn adm-btn-ghost" onClick={() => supabase.auth.signOut()}>Cerrar sesión</button>
-      </div>
-    </div>
-  )
+  if (session === undefined) return <div className="adm-center"><div className="adm-spinner" /></div>
+  if (!session) return <Login onIn={setSession} />
+  return <Shell session={session} onOut={() => { setToken(null); setSession(null) }} />
 }
 
 /* ---------- login ---------- */
-function Login() {
+function Login({ onIn }) {
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const submit = async (e) => {
-    e.preventDefault()
-    setBusy(true); setErr('')
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pass })
-    if (error) setErr(error.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos.' : error.message)
-    setBusy(false)
+    e.preventDefault(); setBusy(true); setErr('')
+    try {
+      const { token, user } = await api.login(email.trim(), pass)
+      setToken(token); onIn({ user })
+    } catch (e) { setErr(e.message); setBusy(false) }
   }
   return (
     <div className="adm-login">
@@ -119,7 +93,7 @@ function Login() {
 }
 
 /* ---------- estructura ---------- */
-function Shell({ session }) {
+function Shell({ session, onOut }) {
   const [tab, setTab] = useState('products')
   const [cats, setCats] = useState([])
   const [toasts, setToasts] = useState([])
@@ -129,12 +103,11 @@ function Shell({ session }) {
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3800)
   }, [])
   const loadCats = useCallback(async () => {
-    const { data, error } = await supabase.from('categories').select('*').order('sort_order').order('name')
-    if (error) notify(error.message, 'err'); else setCats(data)
+    try { setCats(await api.categories()) } catch (e) { notify(e.message, 'err') }
   }, [notify])
   useEffect(() => { loadCats() }, [loadCats])
 
-  const nav = [['products', 'Productos', 'box'], ['categories', 'Categorías', 'tag']]
+  const nav = [['products', 'Productos', 'box'], ['categories', 'Categorías', 'tag'], ['settings', 'Ajustes', 'gear']]
   return (
     <div className="adm-app">
       <aside className="adm-side">
@@ -147,7 +120,7 @@ function Shell({ session }) {
         <div className="adm-side-foot">
           <a className="adm-nav" href="/" target="_blank" rel="noopener"><Icon n="ext" />Ver tienda</a>
           <div className="adm-user">{session.user.email}</div>
-          <button className="adm-nav" onClick={() => supabase.auth.signOut()}><Icon n="out" />Salir</button>
+          <button className="adm-nav" onClick={onOut}><Icon n="out" />Salir</button>
         </div>
       </aside>
       <header className="adm-top">
@@ -155,12 +128,12 @@ function Shell({ session }) {
         <div className="adm-tabs">
           {nav.map(([k, l]) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
         </div>
-        <button className="adm-icon-btn" onClick={() => supabase.auth.signOut()} aria-label="Salir"><Icon n="out" /></button>
+        <button className="adm-icon-btn" onClick={onOut} aria-label="Salir"><Icon n="out" /></button>
       </header>
       <main className="adm-main">
-        {tab === 'products'
-          ? <ProductsView cats={cats} notify={notify} />
-          : <CategoriesView cats={cats} reload={loadCats} notify={notify} />}
+        {tab === 'products' && <ProductsView cats={cats} notify={notify} />}
+        {tab === 'categories' && <CategoriesView cats={cats} reload={loadCats} notify={notify} />}
+        {tab === 'settings' && <SettingsView notify={notify} />}
       </main>
       <div className="adm-toasts" aria-live="polite">
         {toasts.map((t) => <div key={t.id} className={'adm-toast ' + t.kind}>{t.msg}</div>)}
@@ -175,43 +148,33 @@ function ProductsView({ cats, notify }) {
   const [q, setQ] = useState('')
   const [cat, setCat] = useState('')
   const [status, setStatus] = useState('')
-  const [editing, setEditing] = useState(null) // null | {} (nuevo) | producto
+  const [editing, setEditing] = useState(null)
   const [del, setDel] = useState(null)
 
   const load = useCallback(async () => {
-    const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false })
-    if (error) { notify(error.message, 'err'); setItems([]) } else setItems(data)
+    try { setItems(await api.adminProducts()) } catch (e) { notify(e.message, 'err'); setItems([]) }
   }, [notify])
   useEffect(() => { load() }, [load])
 
-  const catName = useMemo(() => Object.fromEntries(cats.map((c) => [c.id, c.name])), [cats])
   const list = useMemo(() => (items || []).filter((p) =>
     (!q || p.name.toLowerCase().includes(q.toLowerCase())) &&
-    (!cat || (cat === 'none' ? !p.category_id : p.category_id === cat)) &&
+    (!cat || (cat === 'none' ? !p.category_id : String(p.category_id) === cat)) &&
     (!status || (status === 'active' ? p.active : status === 'hidden' ? !p.active : p.stock === 0))
   ), [items, q, cat, status])
 
   const stats = useMemo(() => {
     const a = items || []
-    return [
-      ['Productos', a.length], ['Visibles', a.filter((p) => p.active).length],
-      ['Destacados', a.filter((p) => p.featured).length], ['Sin stock', a.filter((p) => p.stock === 0).length],
-    ]
+    return [['Productos', a.length], ['Visibles', a.filter((p) => p.active).length],
+      ['Destacados', a.filter((p) => p.featured).length], ['Sin stock', a.filter((p) => p.stock === 0).length]]
   }, [items])
 
   const toggle = async (p) => {
-    const { error } = await supabase.from('products').update({ active: !p.active }).eq('id', p.id)
-    if (error) return notify(error.message, 'err')
-    setItems((s) => s.map((x) => (x.id === p.id ? { ...x, active: !p.active } : x)))
-    notify(p.active ? 'Producto ocultado de la tienda' : 'Producto visible en la tienda')
+    try { await api.updateProduct(p.id, { active: !p.active }); setItems((s) => s.map((x) => (x.id === p.id ? { ...x, active: !p.active } : x))); notify(p.active ? 'Producto ocultado' : 'Producto visible') }
+    catch (e) { notify(e.message, 'err') }
   }
   const remove = async () => {
-    const p = del
-    const { error } = await supabase.from('products').delete().eq('id', p.id)
-    if (error) return notify(error.message, 'err')
-    const path = p.image_url && p.image_url.split(`/${BUCKET}/`)[1]
-    if (path) supabase.storage.from(BUCKET).remove([path])
-    setItems((s) => s.filter((x) => x.id !== p.id)); setDel(null); notify('Producto eliminado')
+    try { await api.deleteProduct(del.id); setItems((s) => s.filter((x) => x.id !== del.id)); setDel(null); notify('Producto eliminado') }
+    catch (e) { notify(e.message, 'err') }
   }
 
   return (
@@ -260,7 +223,7 @@ function ProductsView({ cats, notify }) {
                   <strong>{p.name}</strong>
                   <span>{p.featured && <em className="adm-pill gold"><Icon n="star" size={12} />Destacado</em>}</span>
                 </div>
-                <div className="adm-cell" data-l="Categoría">{catName[p.category_id] || <span className="adm-muted">Sin categoría</span>}</div>
+                <div className="adm-cell" data-l="Categoría">{p.category_name || <span className="adm-muted">Sin categoría</span>}</div>
                 <div className="adm-cell adm-price" data-l="Precio">{money(p.price)}</div>
                 <div className="adm-cell" data-l="Stock">
                   {p.stock === null ? <span className="adm-muted">Sin control</span> : p.stock === 0 ? <em className="adm-pill red">Sin stock</em> : p.stock}
@@ -278,9 +241,7 @@ function ProductsView({ cats, notify }) {
         )}
       </div>
 
-      {editing && (
-        <ProductForm product={editing} cats={cats} notify={notify} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load() }} />
-      )}
+      {editing && <ProductForm product={editing} cats={cats} notify={notify} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load() }} />}
       {del && (
         <Modal title="Eliminar producto" onClose={() => setDel(null)}>
           <p>¿Eliminar <strong>{del.name}</strong>? Esta acción no se puede deshacer. Si solo querés que no se vea, ocultalo con el interruptor.</p>
@@ -335,30 +296,13 @@ function ProductForm({ product, cats, notify, onClose, onSaved }) {
     setBusy(true)
     try {
       let image_url = f.image_url || null
-      if (file) {
-        const { blob, ext, type } = await toWebp(file)
-        const path = `${crypto.randomUUID()}.${ext}`
-        const up = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: type, cacheControl: '31536000' })
-        if (up.error) throw up.error
-        image_url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl
-        const old = product.image_url && product.image_url.split(`/${BUCKET}/`)[1]
-        if (old) supabase.storage.from(BUCKET).remove([old])
-      } else if (!f.image_url && product.image_url) {
-        const old = product.image_url.split(`/${BUCKET}/`)[1]
-        if (old) supabase.storage.from(BUCKET).remove([old])
-      }
+      if (file) { const up = await api.upload(await downscale(file)); image_url = up.url }
       const row = {
-        name: f.name.trim(), description: f.description.trim() || null, price: Number(f.price),
-        category_id: f.category_id || null, stock: f.stock === '' ? null : Number(f.stock),
-        external_url: f.external_url.trim() || null, active: f.active, featured: f.featured, image_url,
+        name: f.name.trim(), description: f.description.trim(), price: Number(f.price),
+        category_id: f.category_id || null, stock: f.stock === '' ? '' : Number(f.stock),
+        external_url: f.external_url.trim(), active: f.active, featured: f.featured, image_url,
       }
-      let res
-      if (isNew) {
-        const base = slugify(row.name) || 'producto'
-        res = await supabase.from('products').insert({ ...row, slug: base })
-        if (res.error?.code === '23505') res = await supabase.from('products').insert({ ...row, slug: `${base}-${rand()}` })
-      } else res = await supabase.from('products').update(row).eq('id', product.id)
-      if (res.error) throw res.error
+      if (isNew) await api.createProduct(row); else await api.updateProduct(product.id, row)
       notify(isNew ? 'Producto creado' : 'Cambios guardados')
       onSaved()
     } catch (e) { notify(e.message || 'No se pudo guardar', 'err'); setBusy(false) }
@@ -399,7 +343,7 @@ function ProductForm({ product, cats, notify, onClose, onSaved }) {
           </label>
           <div className="adm-two">
             <label className={'adm-field' + (errs.price ? ' bad' : '')}><span>Precio (ARS) *</span>
-              <input type="number" inputMode="decimal" min="0" step="0.01" value={f.price} onChange={(e) => set('price', e.target.value)} placeholder="0,00" />
+              <input type="number" inputMode="decimal" min="0" step="0.01" value={f.price} onChange={(e) => set('price', e.target.value)} placeholder="0" />
               {errs.price && <small>{errs.price}</small>}
             </label>
             <label className={'adm-field' + (errs.stock ? ' bad' : '')}><span>Stock</span>
@@ -416,9 +360,9 @@ function ProductForm({ product, cats, notify, onClose, onSaved }) {
           <label className="adm-field"><span>Descripción</span>
             <textarea rows="4" value={f.description} onChange={(e) => set('description', e.target.value)} placeholder="Contá de qué se trata el producto…" maxLength={1200} />
           </label>
-          <label className={'adm-field' + (errs.external_url ? ' bad' : '')}><span>Enlace de compra (opcional)</span>
+          <label className={'adm-field' + (errs.external_url ? ' bad' : '')}><span>Enlace externo (opcional)</span>
             <input type="url" value={f.external_url} onChange={(e) => set('external_url', e.target.value)} placeholder="https://…" />
-            {errs.external_url ? <small>{errs.external_url}</small> : <small className="adm-hint">Si lo dejás vacío, el botón de la tienda consulta por WhatsApp.</small>}
+            {errs.external_url ? <small>{errs.external_url}</small> : <small className="adm-hint">Enlace a más info. El pedido igual se hace por el carrito.</small>}
           </label>
 
           <div className="adm-toggles">
@@ -449,31 +393,20 @@ function CategoriesView({ cats, reload, notify }) {
     e.preventDefault()
     const n = name.trim(); if (!n) return
     setBusy(true)
-    const slug = slugify(n) || `cat-${rand()}`
-    let res
-    if (edit.id) res = await supabase.from('categories').update({ name: n }).eq('id', edit.id)
-    else {
-      const order = cats.length ? Math.max(...cats.map((c) => c.sort_order)) + 1 : 1
-      res = await supabase.from('categories').insert({ name: n, slug, sort_order: order })
-      if (res.error?.code === '23505') res = await supabase.from('categories').insert({ name: n, slug: `${slug}-${rand()}`, sort_order: order })
-    }
-    setBusy(false)
-    if (res.error) return notify(res.error.message, 'err')
-    notify(edit.id ? 'Categoría actualizada' : 'Categoría creada'); setEdit(null); reload()
+    try {
+      if (edit.id) await api.updateCategory(edit.id, { name: n }); else await api.createCategory({ name: n })
+      notify(edit.id ? 'Categoría actualizada' : 'Categoría creada'); setEdit(null); reload()
+    } catch (e) { notify(e.message, 'err') } finally { setBusy(false) }
   }
   const remove = async () => {
-    const { error } = await supabase.from('categories').delete().eq('id', del.id)
-    if (error) return notify(error.message, 'err')
-    notify('Categoría eliminada'); setDel(null); reload()
+    try { await api.deleteCategory(del.id); notify('Categoría eliminada'); setDel(null); reload() }
+    catch (e) { notify(e.message, 'err') }
   }
   const move = async (c, dir) => {
     const i = cats.findIndex((x) => x.id === c.id), o = cats[i + dir]
     if (!o) return
-    await Promise.all([
-      supabase.from('categories').update({ sort_order: o.sort_order }).eq('id', c.id),
-      supabase.from('categories').update({ sort_order: c.sort_order }).eq('id', o.id),
-    ])
-    reload()
+    try { await Promise.all([api.updateCategory(c.id, { sort_order: o.sort_order }), api.updateCategory(o.id, { sort_order: c.sort_order })]); reload() }
+    catch (e) { notify(e.message, 'err') }
   }
 
   return (
@@ -518,6 +451,51 @@ function CategoriesView({ cats, reload, notify }) {
           </div>
         </Modal>
       )}
+    </>
+  )
+}
+
+/* ---------- ajustes ---------- */
+function SettingsView({ notify }) {
+  const [f, setF] = useState(null)
+  const [busy, setBusy] = useState(false)
+  useEffect(() => { api.settings().then(setF).catch((e) => notify(e.message, 'err')) }, [notify])
+  const set = (k, v) => setF((s) => ({ ...s, [k]: v }))
+  const save = async (e) => {
+    e.preventDefault(); setBusy(true)
+    try { await api.saveSettings(f); notify('Ajustes guardados') } catch (e) { notify(e.message, 'err') } finally { setBusy(false) }
+  }
+  if (!f) return <div className="adm-empty"><div className="adm-spinner" /></div>
+  const FIELDS = [
+    ['brand_name', 'Nombre de la marca', 'text', 'RAMSA'],
+    ['whatsapp', 'WhatsApp (con código de país)', 'text', 'Ej: 549351...'],
+    ['email', 'Email', 'email', 'hola@ramsa.com'],
+    ['instagram', 'Instagram (link)', 'url', 'https://instagram.com/…'],
+    ['facebook', 'Facebook (link)', 'url', 'https://facebook.com/…'],
+    ['tiktok', 'TikTok (link)', 'url', 'https://tiktok.com/@…'],
+  ]
+  return (
+    <>
+      <div className="adm-head"><div><h1 className="adm-h1">Ajustes</h1><p className="adm-muted">Datos de contacto y textos de la tienda.</p></div></div>
+      <form className="adm-card adm-settings" onSubmit={save}>
+        <div className="adm-note"><Icon n="star" size={14} /> El WhatsApp es el que recibe los pedidos del carrito y las consultas. Sin ese número, el botón de pedido queda deshabilitado.</div>
+        <div className="adm-two-grid">
+          {FIELDS.map(([k, label, type, ph]) => (
+            <label className="adm-field" key={k}><span>{label}</span>
+              <input type={type} value={f[k] || ''} onChange={(e) => set(k, e.target.value)} placeholder={ph} />
+            </label>
+          ))}
+        </div>
+        <label className="adm-field"><span>Sobre la marca (sección “Nosotras”)</span>
+          <textarea rows="4" value={f.about || ''} onChange={(e) => set('about', e.target.value)} maxLength={600} />
+        </label>
+        <label className="adm-field"><span>Texto de venta por mayor</span>
+          <textarea rows="3" value={f.wholesale || ''} onChange={(e) => set('wholesale', e.target.value)} maxLength={400} />
+        </label>
+        <div className="adm-settings-foot">
+          <button className="adm-btn adm-btn-primary" disabled={busy}>{busy ? 'Guardando…' : 'Guardar ajustes'}</button>
+        </div>
+      </form>
     </>
   )
 }

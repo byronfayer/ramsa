@@ -199,3 +199,11 @@ a{color:inherit}
 .adm-filters select{width:100%;text-overflow:ellipsis}
 .adm-field .adm-drop-empty small{color:var(--a-muted)}
 .adm-row>.adm-cell::before{font-weight:400}
+
+/* ajustes */
+.adm-settings{padding:24px;display:grid;gap:4px}
+.adm-two-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.adm-note{display:flex;align-items:flex-start;gap:8px;background:#F1F5F1;border:1px solid var(--a-line);border-radius:12px;padding:12px 14px;font-size:.86rem;color:var(--a-ink);margin-bottom:18px}
+.adm-note .adm-ic{color:var(--a-green);margin-top:2px;flex:none}
+.adm-settings-foot{margin-top:10px;display:flex;justify-content:flex-end}
+@media(max-width:620px){.adm-two-grid{grid-template-columns:1fr}.adm-settings{padding:18px}}
