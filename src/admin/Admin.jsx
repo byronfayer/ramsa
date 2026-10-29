@@ -7,17 +7,17 @@ const money = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currenc
 const rand = () => Math.random().toString(36).slice(2, 6)
 
 // Redimensiona y comprime la imagen en el navegador antes de subirla.
-async function downscale(file, max = 1400) {
+async function toDataURL(file, max = 1200) {
   try {
     const bmp = await createImageBitmap(file)
     const k = Math.min(1, max / Math.max(bmp.width, bmp.height))
     const c = document.createElement('canvas')
     c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k)
     c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height)
-    const blob = await new Promise((r) => c.toBlob(r, 'image/webp', 0.85))
-    if (blob) return new File([blob], (file.name.replace(/\.\w+$/, '') || 'img') + '.webp', { type: 'image/webp' })
-  } catch { /* usa el original */ }
-  return file
+    const blob = await new Promise((r) => c.toBlob(r, 'image/webp', 0.78))
+    if (blob) return new Promise((r) => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(blob) })
+  } catch { /* fallback */ }
+  return new Promise((r) => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(file) })
 }
 
 const ICONS = {
@@ -296,7 +296,7 @@ function ProductForm({ product, cats, notify, onClose, onSaved }) {
     setBusy(true)
     try {
       let image_url = f.image_url || null
-      if (file) { const up = await api.upload(await downscale(file)); image_url = up.url }
+      if (file) { image_url = await toDataURL(file) }
       const row = {
         name: f.name.trim(), description: f.description.trim(), price: Number(f.price),
         category_id: f.category_id || null, stock: f.stock === '' ? '' : Number(f.stock),
