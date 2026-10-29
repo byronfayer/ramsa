@@ -114,17 +114,17 @@ if (!anyProd) {
     return r?.id || null
   }
   const prods = [
-    ['Lectura de Tarot', 'lecturas-manos-tarot', 6000, 'Sesión de lectura de tarot personalizada para acompañarte en tus decisiones.', null, true],
-    ['Sahumerios Naturales', 'sahumerios-naturales', 3000, 'Sahumerios artesanales de hierbas seleccionadas para armonizar tus espacios.', null, true],
-    ['Cristales y Piedras', 'piedras-energeticas', 2500, 'Piedras energéticas naturales. Elegí la que vibre con vos.', 12, true],
-    ['Cosmética Natural', 'cosmetica-natural', 4000, 'Cuidado cotidiano con ingredientes naturales y espíritu artesanal.', null, true],
-    ['Oráculo Místico', 'mazos-y-oraculos', 10000, 'Mazo de oráculo para guiar tus preguntas y tus rituales.', null, true],
+    ['Lectura de Tarot', 'lecturas-manos-tarot', 6000, 'Sesión de lectura de tarot personalizada para acompañarte en tus decisiones.', null, true, 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&q=80'],
+    ['Sahumerios Naturales', 'sahumerios-naturales', 3000, 'Sahumerios artesanales de hierbas seleccionadas para armonizar tus espacios.', null, true, 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80'],
+    ['Cristales y Piedras', 'piedras-energeticas', 2500, 'Piedras energéticas naturales. Elegí la que vibre con vos.', 12, true, 'https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?auto=format&fit=crop&w=800&q=80'],
+    ['Cosmética Natural', 'cosmetica-natural', 4000, 'Cuidado cotidiano con ingredientes naturales y espíritu artesanal.', null, true, 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80'],
+    ['Oráculo Místico', 'mazos-y-oraculos', 10000, 'Mazo de oráculo para guiar tus preguntas y tus rituales.', null, true, 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80'],
   ]
-  for (const [name, catSlug, price, desc, stock, featured] of prods) {
+  for (const [name, catSlug, price, desc, stock, featured, img] of prods) {
     const cid = await catId(catSlug)
     const slug = name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-')
-    await sql`INSERT INTO products (name, slug, description, price, category_id, stock, active, featured)
-      VALUES (${name}, ${slug}, ${desc}, ${price}, ${cid}, ${stock}, true, ${featured})`
+    await sql`INSERT INTO products (name, slug, description, price, category_id, stock, active, featured, image_url)
+      VALUES (${name}, ${slug}, ${desc}, ${price}, ${cid}, ${stock}, true, ${featured}, ${img})`
   }
   console.log('✓ Productos de ejemplo')
 } else {

@@ -265,16 +265,8 @@ footer .tag{margin-top:16px;max-width:34ch}
 .spinner{width:34px;height:34px;border-radius:50%;border:3px solid rgba(52,72,59,.18);border-top-color:var(--forest);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ---------- Hero (gradiente, sin foto externa) ---------- */
-.hero{padding:0;background:linear-gradient(115deg,#26372C 0%,#34483B 45%,#4B6354 100%)}
-.hero::before{display:none}
-.hero-bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
-.hero-bg .moon{position:absolute;right:-6%;top:12%;width:min(48vw,520px);aspect-ratio:1;border-radius:50%;
-  background:radial-gradient(circle at 38% 38%, rgba(217,199,160,.55), rgba(217,199,160,.08) 60%, transparent 70%);
-  box-shadow:0 0 120px 20px rgba(217,199,160,.12)}
-.hero-bg::after{content:"";position:absolute;inset:0;background:
-  radial-gradient(circle at 80% 30%, rgba(217,199,160,.10), transparent 45%),
-  linear-gradient(90deg, rgba(20,28,22,.45), transparent 60%)}
+/* ---------- Hero (foto de fondo + overlay) ---------- */
+.hero{padding:0;background:var(--forest)}
 .hero .wrap{position:relative;z-index:1}
 .hero h1 em{font-style:italic;color:var(--champ)}
 
@@ -402,6 +394,39 @@ footer .tag{margin-top:16px;max-width:34ch}
 .flink{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
 .flink:hover{color:var(--champ)}
 
+/* ---------- Features bar ---------- */
+.features{background:var(--forest);color:var(--ivory);padding:20px 0;border-top:1px solid rgba(247,243,236,.08)}
+.features .wrap{display:flex;justify-content:center;gap:clamp(20px,4vw,56px);flex-wrap:wrap}
+.feat{display:flex;align-items:center;gap:10px;font-size:.86rem;opacity:.88;letter-spacing:.02em}
+.feat-icon{font-size:1.2rem}
+
+/* ---------- Social links ---------- */
+.social-row{display:flex;gap:10px}
+.social-link{width:40px;height:40px;border-radius:50%;border:1px solid rgba(247,243,236,.25);display:grid;place-items:center;color:rgba(247,243,236,.8);transition:background .2s,color .2s,border-color .2s}
+.social-link:hover{background:rgba(247,243,236,.12);border-color:rgba(247,243,236,.4);color:var(--ivory)}
+.social-link svg{width:18px;height:18px}
+
+/* ---------- Seguinos band ---------- */
+.seguinos{background:var(--wine);color:var(--ivory);padding:clamp(48px,8vw,80px) 0;text-align:center}
+.seguinos h2{font-size:clamp(1.8rem,4vw,2.8rem);margin-bottom:12px}
+.seguinos p{color:rgba(247,243,236,.85);max-width:50ch;margin:0 auto 28px;font-size:1.02rem}
+.seguinos .social-row{justify-content:center;gap:14px}
+.seguinos .social-link{width:48px;height:48px;border-color:rgba(247,243,236,.35)}
+
+/* ---------- WhatsApp flotante ---------- */
+.wa-float{position:fixed;bottom:24px;right:24px;z-index:60;width:60px;height:60px;border-radius:50%;background:#25D366;color:#fff;display:grid;place-items:center;box-shadow:0 4px 20px rgba(37,211,102,.4);transition:transform .2s,box-shadow .2s}
+.wa-float:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(37,211,102,.55)}
+.wa-float svg{width:28px;height:28px}
+
+/* ---------- Mejoras tarjetas sin imagen ---------- */
+.pcard-img.ph{display:flex;align-items:center;justify-content:center}
+.pcard-img.ph::after{content:"🌿";font-size:2.8rem;opacity:.35}
+
+/* ---------- Footer social row ---------- */
+footer .social-row{margin-top:18px}
+footer .social-link{border-color:rgba(247,243,236,.2);color:rgba(247,243,236,.6)}
+footer .social-link:hover{border-color:var(--champ);color:var(--champ)}
+
 /* ---------- Ajustes responsive v2 ---------- */
 @media(max-width:600px){
   .grid-cards{grid-template-columns:repeat(2,1fr);gap:20px 14px}
@@ -417,4 +442,8 @@ footer .tag{margin-top:16px;max-width:34ch}
   .pdp-buy .qty{align-self:flex-start}
   .pdp-buy .btn{width:100%}
   .receta-steps li{grid-template-columns:1fr;gap:4px}
+  .wa-float{bottom:18px;right:18px;width:54px;height:54px}
+  .wa-float svg{width:26px;height:26px}
+  .features .wrap{gap:14px 24px}
+  .feat{font-size:.78rem;gap:7px}
 }

@@ -5,6 +5,15 @@ import { api } from '../lib/api.js'
 import { useReveal } from '../lib/reveal.js'
 import ProductCard from '../components/ProductCard.jsx'
 
+const HERO_IMG = 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1600&q=80'
+const CAT_IMAGES = {
+  'lecturas-manos-tarot': 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&q=80',
+  'piedras-energeticas': 'https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?auto=format&fit=crop&w=800&q=80',
+  'sahumerios-naturales': 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
+  'cosmetica-natural': 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80',
+  'mazos-y-oraculos': 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
+}
+
 export default function Home() {
   const { settings, categories, cart } = useApp()
   const nav = useNavigate()
@@ -18,7 +27,10 @@ export default function Home() {
     return (f.length ? f : products).slice(0, 8)
   }, [products])
 
-  const thumbFor = (catId) => products.find((p) => p.category_id === catId && p.image_url)?.image_url
+  const thumbFor = (cat) => {
+    if (!cat) return null
+    return products.find((p) => p.category_id === cat.id && p.image_url)?.image_url || CAT_IMAGES[cat.slug] || null
+  }
 
   const waWholesale = cart.waLink(`Hola ${settings.brand_name || 'RAMSA'}, quiero consultar condiciones de venta por mayor.`)
   const tiles = categories.slice(0, 5)
@@ -27,7 +39,7 @@ export default function Home() {
     <>
       {/* Hero */}
       <section className="hero">
-        <div className="hero-bg" aria-hidden="true"><span className="moon" /></div>
+        <img src={HERO_IMG} alt="" aria-hidden="true" onError={e => { e.target.style.display = 'none' }} />
         <div className="wrap">
           <span className="eyebrow">Naturaleza · Artesanía · Bienestar</span>
           <h1>Rituales que conectan con tu <em>esencia</em></h1>
@@ -39,6 +51,15 @@ export default function Home() {
         </div>
       </section>
 
+      <div className="features">
+        <div className="wrap">
+          <div className="feat"><span className="feat-icon" aria-hidden="true">🌿</span> 100% Natural</div>
+          <div className="feat"><span className="feat-icon" aria-hidden="true">✋</span> Hecho a mano</div>
+          <div className="feat"><span className="feat-icon" aria-hidden="true">🔮</span> Desde 1980</div>
+          <div className="feat"><span className="feat-icon" aria-hidden="true">📦</span> Envío a todo el país</div>
+        </div>
+      </div>
+
       {/* Categorías */}
       {tiles.length > 0 && (
         <section id="categorias">
@@ -49,7 +70,7 @@ export default function Home() {
             </div>
             <div className="cats">
               {tiles.map((c, i) => {
-                const img = thumbFor(c.id)
+                const img = thumbFor(c)
                 return (
                   <Link key={c.id} className={`cat c${i + 1} ph rv`} to={`/tienda?cat=${c.slug}`}>
                     {img && <img loading="lazy" src={img} alt="" />}
@@ -87,8 +108,8 @@ export default function Home() {
       <section className="edit" id="universo">
         <div className="wrap">
           <div className="collage rv">
-            <div className="a ph">{thumbFor(tiles[0]?.id) && <img loading="lazy" src={thumbFor(tiles[0].id)} alt="" />}</div>
-            <div className="b ph">{thumbFor(tiles[2]?.id) && <img loading="lazy" src={thumbFor(tiles[2].id)} alt="" />}</div>
+            <div className="a ph">{thumbFor(tiles[0]) && <img loading="lazy" src={thumbFor(tiles[0])} alt="" />}</div>
+            <div className="b ph">{thumbFor(tiles[2]) && <img loading="lazy" src={thumbFor(tiles[2])} alt="" />}</div>
           </div>
           <div className="rv">
             <span className="eyebrow">El universo {settings.brand_name || 'RAMSA'}</span>
